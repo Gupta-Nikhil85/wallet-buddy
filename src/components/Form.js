@@ -1,15 +1,18 @@
 import React, { useState , useEffect} from 'react'
 import { convertDateFormat, ExpenditureCategories, SavingsCategories } from '../util';
+import { useSpeechContext } from '@speechly/react-client';
 
 const Form = () => {
     const [transactions,setTransactions]=useState(JSON.parse(localStorage.getItem('TRANSACTIONS')) || []);
     const [category, setCategory] = useState([]);
+    const {segment} = useSpeechContext();
     
     const [transactionData, setTransactionData] = useState({type:'Savings',Amount:0,Source:'Others',Description:'', Date:''});
     const updateFormValue = (key, value) => {
         setTransactionData({...transactionData, [key]:value});
     }
     const [amount, setAmount]= useState(parseInt(localStorage.getItem('TOTAL_AMOUNT')) || 0);
+    
     useEffect(() => {
         if(transactionData.type==='Expenditure'){
             setCategory(ExpenditureCategories)
@@ -18,6 +21,20 @@ const Form = () => {
             setCategory(SavingsCategories)
         }
     }, [transactionData])
+
+    useEffect(() => {
+        if(segment){
+            if(segment.intent.intent==='add_expense'){
+                updateFormValue({ ...FormData, type:'Expense'});
+            }else if (segment.intent.intent==='add_income'){
+                updateFormValue({ ...FormData, type:'Income'});
+            }else if(segment.isFinal && segment.intent.intent==="create_transaction"){
+                return setTransactionData();
+            }
+        }
+        
+
+    },[segment]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -32,7 +49,10 @@ const Form = () => {
         <div className='text-center'>
             <h4>Total Balance : {amount}</h4>
             <h4>Try Saying</h4>
-            <p>Add Expenses for Rs. 5000 in Category Travel for Thursday.</p>
+            {/* <p>Add Expenses for Rs. 5000 in Category Travel for Thursday.</p> */}
+            <p>{segment && segment.words.map((w) => w.value).join(" ")}
+            </p>
+
         </div>
         <form className="w-100">
             <div className="row">
