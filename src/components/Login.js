@@ -59,10 +59,8 @@ const Login = () => {
                                         <input name="password" type="password" className="form-control bg-dark text-light" id="floatingPassword" autoComplete='off' placeholder="Password"/>
                                         <label htmlFor="floatingPassword">Password</label>
                                     </div>
-                                    <button className="btn btn-outline-light btn-lg px-5 mt-3" type="submit">Login</button>
-                                    <p>New User?
-                                        <a href="/signup">Signup</a>
-                                    </p>
+                                    <button className="btn btn-outline-light btn-lg px-5 my-3" type="submit">Login</button>
+                                    <p>New User? <a href="/signup">Signup</a></p>
                                 </div>
                             </div>
                         </div>

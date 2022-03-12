@@ -8,7 +8,6 @@ Chart.register(ArcElement)
 const BalanceChart = (props) => {
     const {title}= props;
     const {chartData, total}= chartHelper(props);
-    console.log(chartData);
     return (
         <div className='col-12 card rounded-lg shadow-lg'>
             <div className='row p-4'>
