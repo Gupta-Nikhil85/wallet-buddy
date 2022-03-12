@@ -3,25 +3,13 @@ import { convertDateFormat, ExpenditureCategories, SavingsCategories } from '../
 
 const Form = () => {
     const [transactions,setTransactions]=useState(JSON.parse(localStorage.getItem('TRANSACTIONS')) || []);
-        // {type:'Expenditure', Date:convertDateFormat(new Date()), Source:ExpenditureCategories[0], amount:100, description:'Travel to India' },
-        // {type:'Expenditure', Date:convertDateFormat(new Date()), Source:ExpenditureCategories[0], amount:100, description:'Travel to India' },
-        // {type:'Expenditure', Date:convertDateFormat(new Date()), Source:ExpenditureCategories[0], amount:100, description:'Travel to India' },
-        // {type:'Expenditure', Date:convertDateFormat(new Date()), Source:ExpenditureCategories[0], amount:100, description:'Travel to India' },
-        // {type:'Savings', Date:convertDateFormat(new Date()), Source:SavingsCategories[0], amount:100, description:'Travel to India' },
-        // {type:'Savings', Date:convertDateFormat(new Date()), Source:SavingsCategories[0], amount:100, description:'Travel to India' },
-        // {type:'Savings', Date:convertDateFormat(new Date()), Source:SavingsCategories[0], amount:100, description:'Travel to India' },
-        // {type:'Savings', Date:convertDateFormat(new Date()), Source:SavingsCategories[0], amount:100, description:'Travel to India' },
-        // {type:'Savings', Date:convertDateFormat(new Date()), Source:SavingsCategories[0], amount:100, description:'Travel to India' },
-        // {type:'Savings', Date:convertDateFormat(new Date()), Source:SavingsCategories[0], amount:100, description:'Travel to India' },
-        // {type:'Expenditure', Date:convertDateFormat(new Date()), Source:ExpenditureCategories[0], amount:100, description:'Travel to India' },
-    // ];
     const [category, setCategory] = useState([]);
     
     const [transactionData, setTransactionData] = useState({type:'Savings',Amount:0,Source:'Others',Description:'', Date:''});
     const updateFormValue = (key, value) => {
         setTransactionData({...transactionData, [key]:value});
     }
-    const amount= 0;
+    const [amount, setAmount]= useState(parseInt(localStorage.getItem('TOTAL_AMOUNT')) || 0);
     useEffect(() => {
         if(transactionData.type==='Expenditure'){
             setCategory(ExpenditureCategories)
@@ -35,6 +23,8 @@ const Form = () => {
         e.preventDefault();
         setTransactions([...transactions, transactionData]);
         localStorage.setItem('TRANSACTIONS', JSON.stringify(transactions));
+        transactionData.type==='Expenditure' ? setAmount(amount-parseInt(transactionData.Amount)):setAmount(amount+parseInt(transactionData.Amount))
+        localStorage.setItem('TOTAL_AMOUNT', toString(amount));
     }
     
   return (
@@ -48,7 +38,7 @@ const Form = () => {
             <div className="row">
                 <div className="mb-2 col-sm-12 col-md-6">
                     <label className="text-muted font-size-14 mb-2">Type<span className='text-danger'>*</span></label>
-                    <select className='form-select pointer' value={transactionData.type} onChange={(e)=>{updateFormValue('type',e.target.value )}}>
+                    <select className='form-select pointer' value={transactionData.type} onChange={(e)=>{setTransactionData({...transactionData, 'type':e.target.value, 'Source':'Others'} )}}>
                         <option>Savings</option>
                         <option>Expenditure</option>
                     </select>
@@ -87,7 +77,7 @@ const Form = () => {
                             <div className='d-flex align-items-center'>
                                 <div style={transaction.type==='Expenditure'?{color:'red', marginRight:'2px'}:{color:'green',marginRight:'2px'}}>
                                     {transaction.type==='Expenditure'?'-':'+'}
-                                    <span className='font-size-14'>{transaction.amount}</span>
+                                    <span className='font-size-14'>{transaction.Amount}</span>
                                 </div>
                                 <div>
                                     <span className='font-size-14 text-muted'>{transaction.Source}</span>
