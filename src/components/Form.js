@@ -21,16 +21,23 @@ const Form = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        setTransactions([...transactions, transactionData]);
+        transactions.push(transactionData);
         localStorage.setItem('TRANSACTIONS', JSON.stringify(transactions));
-        transactionData.type==='Expenditure' ? setAmount(amount-parseInt(transactionData.Amount)):setAmount(amount+parseInt(transactionData.Amount))
-        localStorage.setItem('TOTAL_AMOUNT', toString(amount));
+        if(transactionData.type==='Expenditure'){
+            setAmount(amount-parseInt(transactionData.Amount));
+            localStorage.setItem('TOTAL_AMOUNT', JSON.stringify(amount-parseInt(transactionData.Amount)));
+        }
+        else{
+            setAmount(amount+parseInt(transactionData.Amount));
+            localStorage.setItem('TOTAL_AMOUNT', JSON.stringify(amount+parseInt(transactionData.Amount)));
+        }
+        window.location.reload(false);
     }
     
   return (
     <div className='col-sm-12 col-md-6 rounded-lg shadow-lg p-4'>
         <div className='text-center'>
-            <h4>Total Balance : {amount}</h4>
+            <h4>Total Balance : Rs. {amount}</h4>
             <h4>Try Saying</h4>
             <p>Add Expenses for Rs. 5000 in Category Travel for Thursday.</p>
         </div>
@@ -53,7 +60,7 @@ const Form = () => {
                     <select className="form-select pointer shadow-none" value={transactionData.Source} onChange={(e)=>{updateFormValue('Source', e.target.value)}}>
                     {category.map(category=>{
                         return (
-                            <option value={category} key={category}> {category} </option>
+                            <option value={category.type} key={category.type}> {category.type} </option>
                         )
                     })}
                 </select>
@@ -69,7 +76,7 @@ const Form = () => {
                 <button type="submit" className="btn btn-outline-dark rounded w-100" onClick={(e) => {handleSubmit(e)}}>Update Balance</button>
             </div>
         </form>
-        <div className='w-100 mt-2' style={{height:'300px', overflowY:'scroll'}}>
+        <div className='w-100 mt-2' style={{height:'200px', overflowY:'scroll'}}>
             {
                 transactions.map((transaction, index)=>{
                     return (
