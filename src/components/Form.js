@@ -7,7 +7,7 @@ const Form = () => {
     const [category, setCategory] = useState([]);
     const {segment} = useSpeechContext();
     
-    const [transactionData, setTransactionData] = useState({type:'Savings',Amount:0,Source:'Others',Description:'', Date:''});
+    const [transactionData, setTransactionData] = useState({type:'Savings',Amount:0,Source:'Others', Date:''});
     const updateFormValue = (key, value) => {
         setTransactionData({...transactionData, [key]:value});
     }
@@ -25,19 +25,39 @@ const Form = () => {
     useEffect(() => {
         if(segment){
             if(segment.intent.intent==='add_expense'){
-                updateFormValue({ ...FormData, type:'Expense'});
+                updateFormValue({ ...transactionData, type:'Expenditure'});
             }else if (segment.intent.intent==='add_income'){
-                updateFormValue({ ...FormData, type:'Income'});
+                updateFormValue({ ...transactionData, type:'Savings'});
             }else if(segment.isFinal && segment.intent.intent==="create_transaction"){
-                return setTransactionData();
+                handleSubmit();
+                return;
+            }else if(segment.isFinal && segment.intent.intent==="cancel_transaction"){
+                window.location.reload(false);
+                return;
+            }
+            segment.entities.forEach(e => {
+                const category = `${e.value.charAt(0)}${e.value.slice(1).toLowerCase()}`;
+
+                if(e.type==='amount'){
+                    updateFormValue('Amount', e.value);
+                }else if(e.type==='category'){
+                    updateFormValue('Source', category);
+                }else if(e.type==='date'){
+                    updateFormValue('Date', e.value);
+                }
+            }); 
+            if(segment && segment.isFinal && transactionData.type && transactionData.Amount && transactionData.Source && transactionData.Date){
+                handleSubmit();
             }
         }
-        
+    }, [segment])
 
-    },[segment]);
-
-    const handleSubmit = (e) => {
-        e.preventDefault();
+    const handleSubmit = (e=null) => {
+        e && e.preventDefault();
+        const {Amount, Date, Source}= transactionData;
+        if(!Amount || !Date || !Source){
+            return;
+        }
         transactions.push(transactionData);
         localStorage.setItem('TRANSACTIONS', JSON.stringify(transactions));
         if(transactionData.type==='Expenditure'){
@@ -78,13 +98,12 @@ const Form = () => {
             <div className="mb-2">
                     <label className="text-muted font-size-14 mb-2">Source<span className='text-danger'>*</span></label>
                     <select className="form-select pointer shadow-none" value={transactionData.Source} onChange={(e)=>{updateFormValue('Source', e.target.value)}}>
-                    {category.map(category=>{
-                        return (
-                            <option value={category.type} key={category.type}> {category.type} </option>
-                        )
-                    })}
-                </select>
-                {transactionData.Source==='Others' && <input type="text" className="form-control shadow-none" placeholder="Description (if any)" value={transactionData.Description} onChange={(e)=>{updateFormValue('Description', e.target.value)}}></input>}
+                        {category.map(category=>{
+                            return (
+                                <option value={category.type} key={category.type}> {category.type} </option>
+                            )
+                        })}
+                    </select>
                 </div>
             <div className="row">
                 <div className="mb-2 col-sm-12">
